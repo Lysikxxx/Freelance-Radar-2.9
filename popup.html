@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --surface: #111113;
+    --surface-2: #17171a;
+    --border: #232327;
+    --text: #e9e9ec;
+    --text-dim: #86868f;
+    --accent: #9dff3c;
+    --accent-dim: rgba(157, 255, 60, 0.14);
+    --red: #ff5c5c;
+    --amber: #ffb454;
+  }
+  * { box-sizing: border-box; }
+  body {
+    width: 320px;
+    margin: 0;
+    padding: 14px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Inter", "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 8px; }
+  .brand-name { font-weight: 600; font-size: 13px; letter-spacing: 0.03em; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-dim); flex: none; }
+  .dot.on { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .dot.off { background: var(--red); }
+  .status-text { font-size: 11px; color: var(--text-dim); }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 6px;
+    text-align: center;
+  }
+  .stat .n {
+    font-family: "SF Mono", "Cascadia Code", monospace;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .stat.warn .n { color: var(--amber); }
+  .stat.bad .n { color: var(--red); }
+  .stat .l { font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+
+  .tabs { display: flex; gap: 2px; margin-bottom: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 2px; }
+  .tab-btn {
+    flex: 1; padding: 6px 0; text-align: center; font-size: 11.5px; color: var(--text-dim);
+    background: transparent; border: none; border-radius: 5px; cursor: pointer; transition: all .15s;
+  }
+  .tab-btn.active { background: var(--surface-2); color: var(--text); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .field { margin-bottom: 10px; }
+  label { display: block; font-size: 11px; color: var(--text-dim); margin-bottom: 4px; }
+  input[type="text"], input[type="password"], input[type="number"], textarea {
+    width: 100%; padding: 7px 8px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 5px; color: var(--text); font-family: inherit; font-size: 12.5px;
+    transition: border .15s, box-shadow .15s;
+  }
+  textarea { height: 46px; resize: none; }
+  select { width: 100%; padding: 7px 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 5px; color: var(--text); font-family: inherit; font-size: 12.5px; }
+  select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-dim); }
+  input:focus, textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-dim); }
+  .price-range { display: flex; gap: 8px; }
+  .price-range div { flex: 1; }
+
+  .toggle-row {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 10px; margin-bottom: 8px;
+  }
+  .toggle-row span { font-size: 12px; }
+  .switch { position: relative; display: inline-block; width: 34px; height: 19px; flex: none; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; inset: 0; background: var(--border); border-radius: 20px; cursor: pointer; transition: .2s; }
+  .slider:before { position: absolute; content: ""; height: 13px; width: 13px; left: 3px; top: 3px; background: var(--text-dim); border-radius: 50%; transition: .2s; }
+  input:checked + .slider { background: var(--accent-dim); }
+  input:checked + .slider:before { transform: translateX(15px); background: var(--accent); }
+
+  button.primary {
+    width: 100%; padding: 9px; background: var(--accent); border: none; border-radius: 6px;
+    color: #0a0a0b; font-weight: 600; font-size: 12.5px; cursor: pointer; margin-top: 4px;
+  }
+  button.primary:hover { filter: brightness(1.08); }
+  button.ghost {
+    width: 100%; padding: 8px; background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+    border-radius: 6px; font-size: 12px; cursor: pointer; margin-top: 6px;
+  }
+  button.ghost:hover { color: var(--text); border-color: var(--text-dim); }
+  button.danger { color: var(--red); }
+  button.danger:hover { color: #fff; background: var(--red); border-color: var(--red); }
+
+  #dumpResult { display: none; margin-top: 6px; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; line-height: 1.45; word-break: break-word; }
+  #dumpResult.ok { color: var(--accent); }
+  #dumpResult.bad { color: var(--red); }
+  #aiTestResult { display: none; margin-top: 6px; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-family: "SF Mono", monospace; font-size: 10.5px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; user-select: text; }
+  #aiTestResult.ok { color: var(--accent); }
+  #aiTestResult.bad { color: var(--red); }
+  #saveStatus { text-align: center; font-size: 11px; color: var(--accent); min-height: 14px; margin-top: 6px; }
+
+  .log-list { max-height: 210px; overflow-y: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px; }
+  .log-row { display: flex; gap: 6px; padding: 4px 2px; font-family: "SF Mono", monospace; font-size: 10.5px; border-bottom: 1px solid var(--border); }
+  .log-row:last-child { border-bottom: none; }
+  .log-time { color: var(--text-dim); flex: none; }
+  .log-msg { color: var(--text); word-break: break-word; }
+  .log-row.warn .log-msg { color: var(--amber); }
+  .log-row.error .log-msg { color: var(--red); }
+  .empty-hint { color: var(--text-dim); font-size: 11.5px; text-align: center; padding: 16px 4px; }
+
+  .health-row {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 10px; margin-bottom: 6px; font-size: 12px;
+  }
+  .health-badge { font-size: 10px; font-weight: 600; letter-spacing: 0.03em; padding: 2px 7px; border-radius: 10px; }
+  .health-badge.ok { color: var(--accent); background: var(--accent-dim); }
+  .health-badge.bad { color: var(--red); background: rgba(255,92,92,0.12); }
+  .health-badge.unknown { color: var(--text-dim); background: var(--surface-2); }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="dot" id="monitorDot"></span>
+      <span class="brand-name">FREELANCE RADAR</span>
+    </div>
+    <span class="status-text" id="statusText">—</span>
+  </header>
+
+  <div class="stats-row">
+    <div class="stat"><div class="n" id="statScanned">0</div><div class="l">Найдено</div></div>
+    <div class="stat"><div class="n" id="statMatched">0</div><div class="l">Совпало</div></div>
+    <div class="stat"><div class="n" id="statSent">0</div><div class="l">Отправлено</div></div>
+    <div class="stat bad"><div class="n" id="statFailed">0</div><div class="l">Ошибки</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="settings">Настройки</button>
+    <button class="tab-btn" data-tab="activity">Активность</button>
+    <button class="tab-btn" data-tab="system">Система</button>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="panel active" id="panel-settings">
+    <div class="field">
+      <label for="telegramId">Telegram Chat ID</label>
+      <input type="text" id="telegramId" placeholder="7143923505">
+    </div>
+    <div class="field">
+      <label for="telegramToken">Telegram Bot Token</label>
+      <input type="password" id="telegramToken" placeholder="123456:AA...">
+    </div>
+    <div class="field">
+      <label for="aiProvider">ИИ-провайдер</label>
+      <select id="aiProvider">
+        <option value="openrouter">OpenRouter (работает из РФ)</option>
+        <option value="deepseek">DeepSeek</option>
+        <option value="groq">Groq (закрыт для РФ)</option>
+        <option value="custom">Свой API (OpenAI-совместимый)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="aiKey">API Key</label>
+      <input type="password" id="aiKey" placeholder="sk-or-...">
+    </div>
+    <div class="field">
+      <label for="aiModel">Модель</label>
+      <input type="text" id="aiModel" placeholder="meta-llama/llama-3.3-70b-instruct:free">
+    </div>
+    <div class="field" id="aiBaseUrlField" style="display:none">
+      <label for="aiBaseUrl">Адрес API (https://…/v1)</label>
+      <input type="text" id="aiBaseUrl" placeholder="https://api.example.com/v1">
+    </div>
+    <div class="field price-range">
+      <div>
+        <label for="minPrice">Мин. цена (₽)</label>
+        <input type="number" id="minPrice" placeholder="1000">
+      </div>
+      <div>
+        <label for="maxPrice">Макс. цена (₽)</label>
+        <input type="number" id="maxPrice" placeholder="0">
+      </div>
+    </div>
+    <div class="field">
+      <label for="aiProfile">О себе для откликов (необязательно)</label>
+      <textarea id="aiProfile" maxlength="500" placeholder="Например: делаю сайты на WordPress и Tilda, Telegram-ботов на Python, сдаю в срок"></textarea>
+    </div>
+    <div class="field">
+      <label for="keywords">Ключевые слова</label>
+      <textarea id="keywords" placeholder="javascript, html, css, бот, верстка"></textarea>
+    </div>
+
+    <div class="toggle-row">
+      <span>Мониторинг бирж</span>
+      <label class="switch"><input type="checkbox" id="monitorToggle" checked><span class="slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <span>ИИ-анализ и отклик (useAiAnalysis)</span>
+      <label class="switch"><input type="checkbox" id="aiToggle" checked><span class="slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <span>Источник: Kwork</span>
+      <label class="switch"><input type="checkbox" id="sourceKworkToggle" checked><span class="slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <span>Источник: Freelance.ru</span>
+      <label class="switch"><input type="checkbox" id="sourceFreelanceToggle" checked><span class="slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <span>Авто-открытие вкладки биржи</span>
+      <label class="switch"><input type="checkbox" id="autoOpenToggle" checked><span class="slider"></span></label>
+    </div>
+
+    <button class="primary" id="saveBtn">Сохранить настройки</button>
+    <button class="ghost" id="runNowBtn">Проверить сейчас</button>
+    <button class="ghost" id="testAiBtn">Проверить ИИ</button>
+    <div id="aiTestResult"></div>
+    <button class="ghost" id="dumpBtn">Диагностика Kwork (скопировать)</button>
+    <div id="dumpResult"></div>
+    <button class="ghost danger" id="resetBtn">Сбросить историю заказов</button>
+    <div id="saveStatus"></div>
+  </div>
+
+  <!-- ACTIVITY -->
+  <div class="panel" id="panel-activity">
+    <div class="log-list" id="logList">
+      <div class="empty-hint">Пока нет событий</div>
+    </div>
+    <button class="ghost" id="clearLogsBtn">Очистить журнал</button>
+  </div>
+
+  <!-- SYSTEM -->
+  <div class="panel" id="panel-system">
+    <div class="health-row"><span>Парсер</span><span class="health-badge unknown" id="healthParser">—</span></div>
+    <div class="health-row"><span>ИИ</span><span class="health-badge unknown" id="healthAi">—</span></div>
+    <div class="health-row"><span>Telegram</span><span class="health-badge unknown" id="healthTelegram">—</span></div>
+    <div class="health-row"><span>Ожидают повторной отправки</span><span id="pendingCount">0</span></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

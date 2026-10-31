@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Freelance Radar",
+  "version": "2.9.0",
+  "description": "Автоматический мониторинг бирж и генерация откликов с ИИ",
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://kwork.ru/*",
+    "https://*.kwork.ru/*",
+    "https://freelance.ru/*",
+    "https://*.freelance.ru/*",
+    "https://openrouter.ai/*",
+    "https://api.deepseek.com/*",
+    "https://api.groq.com/*",
+    "https://api.telegram.org/*",
+    "https://api.tlgrm.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://kwork.ru/*",
+        "https://*.kwork.ru/*"
+      ],
+      "js": ["content.kwork_ru.js"]
+    },
+    {
+      "matches": [
+        "https://freelance.ru/*",
+        "https://*.freelance.ru/*"
+      ],
+      "js": ["content.freelance_ru.js"]
+    }
+  ]
+}
